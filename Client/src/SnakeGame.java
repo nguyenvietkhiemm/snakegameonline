@@ -25,6 +25,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
     private boolean running = false;
     private Timer timer;
     private String id = null;
+    Map<String, ArrayList<Point>> snakes = null;
 
     private int viewportX = 0; // Tọa độ góc trên bên trái của viewport
     private int viewportY = 0;
@@ -44,7 +45,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
         snake.add(new Point(MAP_SIZE / 2, MAP_SIZE / 2)); // Vị trí khởi đầu của rắn
         spawnFood();
         running = true;
-        timer = new Timer(1000 / 60, this);
+        timer = new Timer(1000 / 6, this);
         timer.start();
 
         String tmp = client.receiveResponse();
@@ -81,9 +82,12 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
 
             // Vẽ rắn
             g.setColor(Color.GREEN);
-            for (Point p : snake) {
-                g.fillOval(p.x - viewportX, p.y - viewportY, DOT_SIZE, DOT_SIZE);
+            for (Map.Entry<String, ArrayList<Point>> snake : snakes.entrySet()) {
+                for (Point p : snake.getValue()) {
+                    g.fillOval(p.x - viewportX, p.y - viewportY, DOT_SIZE, DOT_SIZE);
+                }
             }
+
         } else {
             showGameOver(g);
         }
@@ -135,24 +139,24 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
         head.translate((int) (DOT_SIZE * Math.cos(angle)), (int) (DOT_SIZE * Math.sin(angle)));
 
         client.sendSnakePosition(head);
-        String tmp = client.receiveResponse();
-        System.out.println("received:" + tmp);
-        Type mapType = new TypeToken<Map<String, Object>>() {
+        Type mapType = new TypeToken<Map<String, ArrayList<Point>>>() {
         }.getType();
-        Map<String, Object> snakes = gson.fromJson(tmp, mapType);
+        snakes = gson.fromJson(client.receiveResponse(), mapType);
         System.out.println("snakes map: " + snakes);
 
-        // Tính khoảng cách Euclidean giữa head và food
-        double distance = head.distance(food);
+        if (snakes.get(String.valueOf(id)) != null) {
+            double distance = head.distance(food);
 
-        // Kiểm tra khoảng cách giữa head và food <= 0.8
-        if (distance <= 0.9 * DOT_SIZE) {
-            snake.add(0, head);
-            spawnFood();
-        } else {
-            snake.add(0, head);
-            snake.remove(snake.size() - 1);
+            // Kiểm tra khoảng cách giữa head và food <= 0.8
+            if (distance <= 0.9 * DOT_SIZE) {
+                snake.add(0, head);
+                spawnFood();
+            } else {
+                snake.add(0, head);
+                snake.remove(snake.size() - 1);
+            }
         }
+
     }
 
     public void checkCollision() {

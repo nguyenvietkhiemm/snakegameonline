@@ -6,6 +6,8 @@ import java.awt.Point;
 import java.util.HashMap; // Nhập khẩu HashMap
 import java.util.Map; // Nhập khẩu Map
 import com.google.gson.Gson;
+import java.util.ArrayList;
+import java.awt.*;
 
 public class Client {
     private static final String SERVER_ADDRESS = "localhost"; // Địa chỉ IP của server (localhost cho thử nghiệm)
@@ -32,10 +34,8 @@ public class Client {
     // Hàm gửi vị trí rắn lên server
     public void sendSnakePosition(Point head) {
         try {
-            HashMap<String, Object> position = new HashMap<>();
-            position.put("x", head.x);
-            position.put("y", head.y);
-
+            ArrayList<Point> position = new ArrayList<Point>();
+            position.add(head);
             out.write(gson.toJson(position) + "\n");
             out.flush();
         } catch (IOException e) {

@@ -2,31 +2,21 @@ package Server;
 
 import java.util.HashMap; // Nhập khẩu HashMap
 import java.util.Map; // Nhập khẩu Map
+import java.util.ArrayList;
+import java.awt.*;
 
 public class Match {
-    static Snake[] snakes = new Snake[5];
+    static Map<String, ArrayList<Point>> snakes = new HashMap<>();
 
-    public static Map<String, Object> getSnakes(){
-        Map<String, Object> snakesMap = new HashMap<>();
-
-        for (Snake snake : snakes)
-        {
-            snakesMap.put("id", snake.getId());
-            snakesMap.put("location", snake.location());
-        }
-
-        return snakesMap;
+    public static Map<String, ArrayList<Point>> getSnakes() {
+        return snakes;
     }
 
-    public static void addSnake(Snake snake)
-    {
-        for (int i = 0; i < snakes.length; i++)
-        {
-            if (snakes[i] == null)
-            {
-                snakes[i] = snake;
-                return;
-            }
-        }
+    public static void updateSnake(String id, ArrayList<Point> snake) {
+        snakes.put(id, snake);
+    }
+
+    public static void removeSnake(String id) {
+        snakes.remove(id);
     }
 }
