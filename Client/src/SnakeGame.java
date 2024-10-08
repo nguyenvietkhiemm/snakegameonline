@@ -45,7 +45,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
         snake.add(new Point(MAP_SIZE / 2, MAP_SIZE / 2)); // Vị trí khởi đầu của rắn
         spawnFood();
         running = true;
-        timer = new Timer(1000 / 6, this);
+        timer = new Timer(1000 / 60, this);
         timer.start();
 
         String tmp = client.receiveResponse();
@@ -138,7 +138,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
         // Di chuyển theo hướng của chuột
         head.translate((int) (DOT_SIZE * Math.cos(angle)), (int) (DOT_SIZE * Math.sin(angle)));
 
-        client.sendSnakePosition(head);
+        client.sendSnakePosition(snake);
         Type mapType = new TypeToken<Map<String, ArrayList<Point>>>() {
         }.getType();
         snakes = gson.fromJson(client.receiveResponse(), mapType);

@@ -32,11 +32,9 @@ public class Client {
     }
 
     // Hàm gửi vị trí rắn lên server
-    public void sendSnakePosition(Point head) {
+    public void sendSnakePosition(ArrayList<Point> snake) {
         try {
-            ArrayList<Point> position = new ArrayList<Point>();
-            position.add(head);
-            out.write(gson.toJson(position) + "\n");
+            out.write(gson.toJson(snake) + "\n");
             out.flush();
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -63,7 +61,6 @@ public class Client {
 
     public static void main(String[] args) {
         Client client = new Client();
-        client.sendSnakePosition(new Point(100, 150)); // Gửi một vị trí thử nghiệm
 
         String response = client.receiveResponse();
         System.out.println("Server response: " + response);
