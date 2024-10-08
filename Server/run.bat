@@ -1,0 +1,6 @@
+@echo off
+echo Compiling the Java program...
+javac -cp "libs/*" -d classes ./src/*.java
+echo Running the Server...
+java -cp "classes;libs/*" Server.Server
+pause
