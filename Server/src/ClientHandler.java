@@ -40,26 +40,21 @@ public class ClientHandler extends Thread {
             outToClient.flush();
 
             String message;
-            while ((message = inFromClient.readLine()) != null &&
-                    !message.equals("exit")) {
-                System.out.println("Received from client " + this.getClientId() + " : " +
-                        message);
+            while ((message = inFromClient.readLine()) != null && !message.equals("exit")) {
+                System.out.println("Received from client " + this.getClientId() + " : " + message);
 
-                Type mapType = new TypeToken<Map<String, Integer>>() {
-                }.getType();
+                Type mapType = new TypeToken<Map<String, Integer>>() {}.getType();
                 // solve
                 Map<String, Integer> jsonReq = gson.fromJson(message, mapType);
-                Map<String, Integer> jsonResponse = new HashMap<>();
+                Map<String, Map<String, Integer>> jsonResponse = new HashMap<>();
 
-                snake.setLocation(Integer.parseInt((String) jsonReq.get("x")),
-                        Integer.parseInt((String) jsonReq.get("y")));
+                snake.setLocation(jsonReq.get("x"), jsonReq.get("y"));
 
                 jsonResponse.put(String.valueOf(id), snake.location());
-
-                outToClient.write(gson.toJson(jsonResponse) + "\n");
+                Type responseType = new TypeToken<Map<String, Map<String, Integer>>>() {}.getType();
+                outToClient.write(gson.toJson(jsonResponse, responseType) + "\n");
                 outToClient.flush();
-                System.out.println("sent to client" + gson.toJson(jsonResponse) +
-                        "\n");
+                System.out.println("sent to client" + gson.toJson(jsonResponse, responseType) + "\n");
             }
 
             clientSocket.close();

@@ -16,8 +16,8 @@ public class Snake {
     }
 
     // Getters and setters
-    public Map<String, Object> location(){
-        return new HashMap<String, Object>() {{
+    public Map<String, Integer> location(){
+        return new HashMap<String, Integer>() {{
             put("x", x);
             put("y", y);
         }};
