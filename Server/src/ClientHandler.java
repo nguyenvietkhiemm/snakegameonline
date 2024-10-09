@@ -59,10 +59,11 @@ public class ClientHandler extends Thread {
                 outToClient.flush();
                 System.out.println("sent to client" + gson.toJson(jsonResponse, responseType) + "\n");
             }
-
+            Match.removeSnake(String.valueOf(id));
             clientSocket.close();
 
         } catch (IOException e) {
+            Match.removeSnake(String.valueOf(id));
             e.printStackTrace();
         }
     }
