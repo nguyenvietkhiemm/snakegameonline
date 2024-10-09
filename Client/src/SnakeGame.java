@@ -81,13 +81,26 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
             g.fillOval(food.x - viewportX, food.y - viewportY, DOT_SIZE, DOT_SIZE);
 
             // Vẽ rắn
-            g.setColor(Color.GREEN);
             for (Map.Entry<String, ArrayList<Point>> snake : snakes.entrySet()) {
-                for (Point p : snake.getValue()) {
+                String playerId = snake.getKey();
+                ArrayList<Point> snakeBody = snake.getValue();
+
+                // Vẽ rắn
+                g.setColor(Color.GREEN);
+                for (Point p : snakeBody) {
                     g.fillOval(p.x - viewportX, p.y - viewportY, DOT_SIZE, DOT_SIZE);
                 }
-            }
 
+                // Vẽ ID người chơi trên đầu rắn (phần tử đầu tiên)
+                if (!snakeBody.isEmpty()) {
+                    Point head = snakeBody.get(0);
+                    g.setColor(Color.BLACK);
+
+                    // Tăng kích cỡ chữ
+                    g.setFont(new Font("Arial", Font.BOLD, 14)); // Tăng kích cỡ chữ lên 14
+                    g.drawString(playerId, head.x - viewportX + 7, head.y - viewportY - 7);
+                }
+            }
         } else {
             showGameOver(g);
         }
