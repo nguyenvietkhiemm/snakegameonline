@@ -123,79 +123,80 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
     }
 
 
-// public class Food {
-//     public Point position;  // vị trí của food
-//     public int baseSize;  // Kích thước Food cơ bản
-//     public int currentSize;  // Kích thước Food hiện tại để nhấp nháy
-//     public Color color;     // màu sắc của food
-//     public BufferedImage glowImage; // Hình ảnh phát sáng (hiệu ứng blur)
-//     private boolean increasing = true; // điều khiển đốm sáng nhấp nháy
-//     private int blinkSpeed = 1; // Tốc độ nhấp nháy
+public class Food {
+    public Point position;  // vị trí của food
+    public int baseSize;  // Kích thước Food cơ bản
+    public int currentSize;  // Kích thước Food hiện tại để nhấp nháy
+    public Color color;     // màu sắc của food
+    public BufferedImage glowImage; // Hình ảnh phát sáng (hiệu ứng blur)
+    private boolean increasing = true; // điều khiển đốm sáng nhấp nháy
+    private int blinkSpeed = 1; // Tốc độ nhấp nháy
 
-//     // Constructor mới, thay glowColor bằng glowImage (hình ảnh với hiệu ứng blur)
-//     public Food(Point position, int size, Color color, BufferedImage glowImage) {
-//         this.position = position;
-//         this.baseSize = size;
-//         this.currentSize = size;
-//         this.color = color;
-//         this.glowImage = glowImage;
-//     }
+    // Constructor mới, thay glowColor bằng glowImage (hình ảnh với hiệu ứng blur)
+    public Food(Point position, int size, Color color, BufferedImage glowImage) {
+        this.position = position;
+        this.baseSize = size;
+        this.currentSize = size;
+        this.color = color;
+        this.glowImage = glowImage;
+    }
 
-//     // Hàm cập nhật hiệu ứng nhấp nháy
-//     public void updateBlink() {
-//         if (increasing) {
-//             currentSize += blinkSpeed; //tăng kích thước theo tốc độ nhấp nháy
-//             if (currentSize >= baseSize + 5) { // Đốm sáng tăng lên tối đa 5 đơn vị
-//                 increasing = false;
-//             }
-//         } else {
-//             currentSize -= blinkSpeed;
-//             if (currentSize <= baseSize - 5) { // Đốm sáng giảm xuống tối đa 5 đơn vị
-//                 increasing = true;
-//             }
-//         }
-//     }
+    // Hàm cập nhật hiệu ứng nhấp nháy
+    public void updateBlink() {
+        if (increasing) {
+            currentSize += blinkSpeed; //tăng kích thước theo tốc độ nhấp nháy
+            if (currentSize >= baseSize + 5) { // Đốm sáng tăng lên tối đa 5 đơn vị
+                increasing = false;
+            }
+        } else {
+            currentSize -= blinkSpeed;
+            if (currentSize <= baseSize - 5) { // Đốm sáng giảm xuống tối đa 5 đơn vị
+                increasing = true;
+            }
+        }
+    }
 
-//     // Hàm vẽ Food lên màn hình, vẽ cả food và glowImage (hình ảnh phát sáng)
-//     public void draw(Graphics2D g) {
-//         // Vẽ hình chính (food)
-//         g.setColor(color);
-//         g.fillOval(position.x, position.y, currentSize, currentSize);
+    // Hàm vẽ Food lên màn hình, vẽ cả food và glowImage (hình ảnh phát sáng)
+    public void draw(Graphics2D g) {
+        // Vẽ hình chính (food)
+        g.setColor(color);
+        g.fillOval(position.x, position.y, currentSize, currentSize);
 
-//         // Vẽ hình phát sáng mờ (glowImage)
-//         int glowSize = currentSize + 10; // Kích thước của đốm sáng lớn hơn một chút
-//         g.drawImage(glowImage, position.x - 5, position.y - 5, glowSize, glowSize, null);
-//     }
-// }
+        // Vẽ hình phát sáng mờ (glowImage)
+        int glowSize = currentSize + 10; // Kích thước của đốm sáng lớn hơn một chút
+        g.drawImage(glowImage, position.x - 5, position.y - 5, glowSize, glowSize, null);
+    }
+}
 
     
 
-    // private BufferedImage createBlurredImage(int size, Color color) {
-    //     // Tạo BufferedImage để vẽ food
-    //     BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
-    //     Graphics2D g2d = image.createGraphics();
+    private BufferedImage createBlurredImage(int size, Color color) {
+        // Tạo BufferedImage để vẽ food
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = image.createGraphics();
 
-    //     // Vẽ hình tròn với màu food
-    //     g2d.setColor(color);
-    //     g2d.fillOval(0, 0, size, size);
+        // Vẽ hình tròn với màu food
+        g2d.setColor(color);
+        g2d.fillOval(0, 0, size, size);
 
-    //     // Áp dụng Gaussian blur
-    //     float[] kernel = {
-    //             1f / 16f, 2f / 16f, 1f / 16f,
-    //             2f / 16f, 4f / 16f, 2f / 16f,
-    //             1f / 16f, 2f / 16f, 1f / 16f
-    //     };
-    //     ConvolveOp blur = new ConvolveOp(new Kernel(3, 3, kernel), ConvolveOp.EDGE_NO_OP, null);
-    //     BufferedImage blurredImage = blur.filter(image, null);
+        // Áp dụng Gaussian blur
+        float[] kernel = {
+                1f / 16f, 2f / 16f, 1f / 16f,
+                2f / 16f, 4f / 16f, 2f / 16f,
+                1f / 16f, 2f / 16f, 1f / 16f
+        };
+        ConvolveOp blur = new ConvolveOp(new Kernel(3, 3, kernel), ConvolveOp.EDGE_NO_OP, null);
+        BufferedImage blurredImage = blur.filter(image, null);
 
-    //     g2d.dispose();
-    //     return blurredImage;
-    // }
+        g2d.dispose();
+        return blurredImage;
+    }
+
     public void spawnFood(int numberOfFoods) {
         Random rand = new Random();
-        // int x = rand.nextInt(MAP_SIZE / DOT_SIZE) * DOT_SIZE;
-        // int y = rand.nextInt(MAP_SIZE / DOT_SIZE) * DOT_SIZE;
-        // food = new Point(x, y);
+        int x = rand.nextInt(MAP_SIZE / DOT_SIZE) * DOT_SIZE;
+        int y = rand.nextInt(MAP_SIZE / DOT_SIZE) * DOT_SIZE;
+        food = new Point(x, y);
 
         for (int i = 0; i < numberOfFoods; i++) {
             int x = rand.nextInt(MAP_SIZE / DOT_SIZE) * DOT_SIZE;
@@ -203,8 +204,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
             int size = rand.nextInt(10) + 15;
             Color color = new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat(), 0.8f);
 
-            // Tạo hình ảnh blur (mờ) cho food
-            // BufferedImage glowImage = createBlurredImage(size, color);
+            BufferedImage glowImage = createBlurredImage(size, color);
 
             foods.add(new Food(new Point(x, y), size, color));
         }
