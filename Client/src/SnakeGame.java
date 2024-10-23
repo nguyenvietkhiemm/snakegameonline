@@ -49,9 +49,13 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
 
         // Tải ảnh từ đường dẫn
         try {
-            backgroundImage = ImageIO.read(new File("C://Users//ADMIN//OneDrive//Desktop//snakegameonline//Client//GameVisual//background.jpg")); // Đường dẫn ảnh nền
+            backgroundImage = ImageIO.read(new File("D:\\Test\\SnakeGame\\Client\\GameVisual\\background.jpg"));
+            if (backgroundImage == null) {
+                System.out.println("Hình ảnh không được đọc.");
+            }
         } catch (IOException e) {
             e.printStackTrace();
+            System.out.println("Không thể đọc tệp hình ảnh: " + e.getMessage());
         }
 
         startGame();
