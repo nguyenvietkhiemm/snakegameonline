@@ -1,4 +1,4 @@
-package Server;
+package Server.src;
 
 import java.util.HashMap; // Nhập khẩu HashMap
 import java.util.Map; // Nhập khẩu Map

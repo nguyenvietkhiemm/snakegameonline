@@ -1,76 +1,81 @@
-package Server;
+package Server.src;
 
-import java.io.*;
-import java.net.*;
-import java.util.Base64;
-import java.util.HashMap; // Nhập khẩu HashMap
-import java.util.Map; // Nhập khẩu Map
-import java.util.Random;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.awt.*;
 
-public class ClientHandler extends Thread {
-    private static int clientCounter = 0;
-    private Socket clientSocket;
+public class ClientHandler {
+    private InetAddress clientAddress;
+    private int clientPort;
+    private DatagramSocket socket;
     private int id;
     private ArrayList<Point> snake = new ArrayList<>();
-    Gson gson = new Gson();
+    private static Gson gson = new Gson();
 
-    // Constructor nhận socket của client
-    public ClientHandler(Socket socket) {
-        this.id = ++ClientHandler.clientCounter;
-        this.clientSocket = socket;
+    public ClientHandler(InetAddress clientAddress, int clientPort, DatagramSocket socket, int id) {
+        this.id = id;
+        this.clientAddress = clientAddress;
+        this.clientPort = clientPort;
+        this.socket = socket;
     }
 
-    public int getClientId() {
-        return this.id;
-    }
-
-    @Override
-    public void run() {
+    public void handleClientMessage(String message) {
         try {
-            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            BufferedWriter outToClient = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             Map<String, Integer> jsonRes = new HashMap<>();
             jsonRes.put("id", id);
 
-            Match.updateSnake(String.valueOf(id), snake);
+            // Gửi lại ID cho client
+            sendMessage(gson.toJson(jsonRes));
 
-            outToClient.write(gson.toJson(jsonRes) + "\n");
-            outToClient.flush();
+            // Xử lý thông điệp nhận từ client
+            try {
+                Type snakeDataType = new TypeToken<SnakeData>() {}.getType();
+                SnakeData snakeData = gson.fromJson(message, snakeDataType);
 
-            String message;
-            while ((message = inFromClient.readLine()) != null && !message.equals("exit")) {
-                System.out.println("Received from client " + this.getClientId() + " : " + message);
+                if (snakeData != null) {
+                    // Cập nhật snake của người chơi
+                    Match.updateSnake(String.valueOf(id), snakeData);
+                }
+            } catch (Exception e) {
+                try {
+                    Type pointListType = new TypeToken<ArrayList<Point>>() {}.getType();
+                    ArrayList<Point> newPoints = gson.fromJson(message, pointListType);
 
-                Type mapType = new TypeToken<ArrayList<Point>>() {
-                }.getType();
-                // solve
-                snake = gson.fromJson(message, mapType);
-                Match.updateSnake(String.valueOf(id), snake);
-                Map<String, ArrayList<Point>> jsonResponse = Match.getSnakes();
-
-                Type responseType = new TypeToken<Map<String, ArrayList<Point>>>() {
-                }.getType();
-                outToClient.write(gson.toJson(jsonResponse, responseType) + "\n");
-                outToClient.flush();
-                System.out.println("sent to client" + gson.toJson(jsonResponse, responseType) + "\n");
+                    if (newPoints != null) {
+                        SnakeData existingSnakeData = Match.getSnakeDataById(String.valueOf(id));
+                        if (existingSnakeData != null) {
+                            existingSnakeData.setSnakePoint(newPoints);
+                            Match.updateSnake(String.valueOf(id), existingSnakeData);
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Invalid message format received: " + message);
+                }
             }
-            Match.removeSnake(String.valueOf(id));
-            clientSocket.close();
+
+            // Gửi tất cả thông tin rắn hiện có cho client
+            Map<String, SnakeData> jsonResponse = Match.getSnakes();
+            Type responseType = new TypeToken<Map<String, SnakeData>>() {}.getType();
+            sendMessage(gson.toJson(jsonResponse, responseType));
+
+            System.out.println("Sent to client: " + gson.toJson(jsonResponse, responseType) + "\n");
 
         } catch (IOException e) {
-            Match.removeSnake(String.valueOf(id));
             e.printStackTrace();
         }
     }
 
-    // Phương thức để tạo token dựa trên ID
-    private String generateToken(int id) {
-        String tokenBase = "ClientID:" + id; // Tạo chuỗi từ ID
-        return Base64.getEncoder().encodeToString(tokenBase.getBytes()); // Mã hóa Base64
+    private void sendMessage(String message) throws IOException {
+        byte[] sendBuffer = message.getBytes();
+        DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, clientAddress, clientPort);
+        socket.send(sendPacket);
     }
 }
