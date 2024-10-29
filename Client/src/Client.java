@@ -1,41 +1,50 @@
-package Client;
+package Client.src;
 
-import java.io.*;
-import java.net.*;
-import java.awt.Point;
-import java.util.HashMap; // Nhập khẩu HashMap
-import java.util.Map; // Nhập khẩu Map
-import com.google.gson.Gson;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
+import com.google.gson.Gson;
 import java.awt.*;
 
 public class Client {
-    private static final String SERVER_ADDRESS = "localhost"; // Địa chỉ IP của server (localhost cho thử nghiệm)
+    private static final String SERVER_ADDRESS = "localhost"; // Địa chỉ IP của server
     private static final int SERVER_PORT = 60000;
 
-    private Socket socket;
-    private BufferedWriter out;
-    private BufferedReader in;
-
-    Gson gson = new Gson();
+    private DatagramSocket socket;
+    private InetAddress serverAddress;
+    private Gson gson = new Gson();
 
     public Client() {
         try {
-            socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-            out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
+            socket = new DatagramSocket();
+            serverAddress = InetAddress.getByName(SERVER_ADDRESS);
             System.out.println("Connected to server");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    // Hàm gửi vị trí rắn lên server
-    public void sendSnakePosition(ArrayList<Point> snake) {
+    // Hàm gửi vị trí rắn, màu rắn, tên rắn lên server
+    public void sendSnakeData(SnakeData snakeData) {
         try {
-            out.write(gson.toJson(snake) + "\n");
-            out.flush();
+            String message = gson.toJson(snakeData);
+            byte[] sendBuffer = message.getBytes();
+            DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, serverAddress, SERVER_PORT);
+            socket.send(sendPacket);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    // Hàm gửi vị trí rắn (mảng điểm) lên server
+    public void sendSnakeLocation(ArrayList<Point> snake) {
+        try {
+            String message = gson.toJson(snake);
+            byte[] sendBuffer = message.getBytes();
+            DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, serverAddress, SERVER_PORT);
+            socket.send(sendPacket);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -44,7 +53,11 @@ public class Client {
     // Nhận phản hồi từ server
     public String receiveResponse() {
         try {
-            return in.readLine();
+            byte[] receiveBuffer = new byte[1024];
+            DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+            socket.receive(receivePacket);
+
+            return new String(receivePacket.getData(), 0, receivePacket.getLength());
         } catch (IOException e) {
             System.out.println(e.getMessage());
             return null;
@@ -52,16 +65,15 @@ public class Client {
     }
 
     public void closeConnection() {
-        try {
+        if (socket != null && !socket.isClosed()) {
             socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
     public static void main(String[] args) {
         Client client = new Client();
 
+        // Nhận phản hồi từ server
         String response = client.receiveResponse();
         System.out.println("Server response: " + response);
 
