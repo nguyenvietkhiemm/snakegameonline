@@ -2,5 +2,5 @@
 echo Compiling the Java program...
 javac -cp "libs/*" -d classes ./src/*.java
 echo Running the Client...
-java -cp "classes;libs/*" Client.SnakeGame
+java -cp "classes;libs/*" Client.src.SnakeGame
 pause

@@ -67,7 +67,4 @@ public class SnakeData {
     public void setAlive(boolean alive) {
         this.alive = alive;
     }
-    
-    
-   
 }

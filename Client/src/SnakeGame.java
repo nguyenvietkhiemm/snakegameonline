@@ -15,7 +15,6 @@ import java.lang.reflect.Type;
 import javax.imageio.ImageIO;
 
 public class SnakeGame extends JPanel implements ActionListener, MouseMotionListener {
-
     private Client client = new Client();
 
     private final int WIDTH = 1000;
@@ -66,10 +65,9 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
         viewportY = MAP_SIZE / 2 - HEIGHT / 2;
 
         snakeColor = new Color(red, green, blue);
-        spawnFood(20);
         running = true;
         score = 0;
-        timer = new Timer(1000 / 165, this);
+        timer = new Timer(1, this);
         SnakeData snakeData = new SnakeData(snake, playerName, red, green, blue, true);
         client.sendSnakeData(snakeData);
         timer.start();
@@ -78,38 +76,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
         Type mapType = new TypeToken<Map<String, String>>() {}.getType();
         Map<String, String> parsedMap = gson.fromJson(tmp, mapType);
         id = parsedMap.get("id");
-    }
-
-    public class Food {
-        public Point position;
-        public int baseSize;
-        public int currentSize;
-        public Color color;
-        public Color glowColor;
-        private boolean increasing = true;
-        private int blinkSpeed = 1;
-
-        public Food(Point position, int size, Color color, Color glowColor) {
-            this.position = position;
-            this.baseSize = size;
-            this.currentSize = size;
-            this.color = color;
-            this.glowColor = glowColor;
-        }
-
-        public void updateBlink() {
-            if (increasing) {
-                currentSize += blinkSpeed;
-                if (currentSize >= baseSize + 5) {
-                    increasing = false;
-                }
-            } else {
-                currentSize -= blinkSpeed;
-                if (currentSize <= baseSize - 5) {
-                    increasing = true;
-                }
-            }
-        }
+        System.out.println(id);
     }
 
     public void spawnFood(int numberOfFoods) {
@@ -120,15 +87,6 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
             Color color = new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat(), 0.8f);
             Color glowColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
             foods.add(new Food(new Point(x, y), size, color, glowColor));
-        }
-    }
-
-    private void spawnFoodAtLocation(Point location, int numberOfFoods) {
-        for (int i = 0; i < numberOfFoods; i++) {
-            int size = rand.nextInt(10) + 15;
-            Color color = new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat(), 0.8f);
-            Color glowColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), 100);
-            foods.add(new Food(location, size, color, glowColor));
         }
     }
 
@@ -273,12 +231,6 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
     private void handleSnakeDeath(String snakeId) {
         SnakeData deadSnake = snakes.get(snakeId);
         deadSnake.setAlive(false);
-        if (deadSnake != null) {
-            for (Point point : deadSnake.getSnakePoint()) {
-                spawnFoodAtLocation(point, 1);
-            }
-            snakes.remove(snakeId);
-        }
 
         if (snakeId.equals(id)) {
             endGame();
