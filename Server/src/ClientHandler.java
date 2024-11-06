@@ -77,8 +77,11 @@ public class ClientHandler implements Runnable {
 
     public void handleClientMessage(String message) {
         try {
-            double angle = Double.parseDouble(message);
-
+            Type type = new TypeToken<Map<String, Double>>() {}.getType();
+            Map<String, Double> tmp = gson.fromJson(message, type);
+            String id = tmp.keySet().iterator().next();  // Lấy khóa đầu tiên làm id
+            double angle = tmp.get(id);  // Lấy giá trị tương ứng làm góc angle
+            
             SnakeData existingSnakeData = Match.getSnakeDataById(String.valueOf(id));
             if (existingSnakeData != null) {
                 existingSnakeData.setAngle(angle);

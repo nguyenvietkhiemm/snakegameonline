@@ -19,7 +19,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
 
     private final int WIDTH = 1000;
     private final int HEIGHT = 800;
-    private final int MAP_SIZE = 5000;
+    private final int MAP_SIZE = 2000;
     private final int DOT_SIZE = 35;
 
     private Point mousePosition = new Point(MAP_SIZE / 5 - WIDTH / 2, MAP_SIZE / 5 - HEIGHT / 2);
@@ -29,7 +29,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
 
     private boolean running = false;
     private Timer timer;
-    private String id = null;
+    public static String id = null;
     private String playerName = "";
 
     private ArrayList<Food> foods = new ArrayList<>();
@@ -112,6 +112,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
                     if (snake == null) {
                         running = false;
                         endGame();
+                        client.closeConnection();
                         break;
                         
                     }
@@ -174,7 +175,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
                 if (snakeData == null)
                     continue;
 
-                Point head = snakeData.getSnakePoint().get(0);
+                Point _head = snakeData.getSnakePoint().get(0);
                 double angle = snakeData.getAngle();
 
                 g.setColor(snakeData.getColor());
@@ -192,17 +193,17 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
 
                 g.setColor(Color.WHITE);
                 // Vẽ mắt trái và phải
-                g.fillOval(head.x - viewportX + eyeXOffset - (eyeSize / 2),
-                        head.y - viewportY + eyeYOffset - (eyeSize / 2), eyeSize, eyeSize);
-                g.fillOval(head.x - viewportX - (eyeXOffset / 3) - (eyeSize / 2),
-                        head.y - viewportY - (eyeYOffset / 3) - (eyeSize / 2), eyeSize, eyeSize);
+                g.fillOval(_head.x - viewportX + eyeXOffset - (eyeSize / 2),
+                        _head.y - viewportY + eyeYOffset - (eyeSize / 2), eyeSize, eyeSize);
+                g.fillOval(_head.x - viewportX - (eyeXOffset / 3) - (eyeSize / 2),
+                        _head.y - viewportY - (eyeYOffset / 3) - (eyeSize / 2), eyeSize, eyeSize);
 
                 int pupilSize = 5;
                 g.setColor(Color.BLACK);
-                g.fillOval(head.x - viewportX + eyeXOffset - (pupilSize / 2),
-                        head.y - viewportY + eyeYOffset - (pupilSize / 2), pupilSize, pupilSize);
-                g.fillOval(head.x - viewportX - (eyeXOffset / 3) - (pupilSize / 2),
-                        head.y - viewportY - (eyeYOffset / 3) - (pupilSize / 2), pupilSize, pupilSize);
+                g.fillOval(_head.x - viewportX + eyeXOffset - (pupilSize / 2),
+                        _head.y - viewportY + eyeYOffset - (pupilSize / 2), pupilSize, pupilSize);
+                g.fillOval(_head.x - viewportX - (eyeXOffset / 3) - (pupilSize / 2),
+                        _head.y - viewportY - (eyeYOffset / 3) - (pupilSize / 2), pupilSize, pupilSize);
 
                 g.setColor(Color.WHITE);
                 g.setFont(new Font("Arial", Font.BOLD, 20));
@@ -211,8 +212,8 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
                 FontMetrics metrics = g.getFontMetrics(g.getFont());
                 int stringWidth = metrics.stringWidth(userName);
 
-                int x = head.x - viewportX - stringWidth / 2;
-                int y = head.y - viewportY - 25;
+                int x = _head.x - viewportX - stringWidth / 2;
+                int y = _head.y - viewportY - 25;
                 g.drawString(userName, x, y);
             }
 

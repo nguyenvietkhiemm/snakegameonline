@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.awt.*;
+import java.util.*;
 
 public class Client {
     private static final String SERVER_ADDRESS = "localhost"; // Địa chỉ IP của server
@@ -50,8 +51,10 @@ public class Client {
             }
             double angle = Math.atan2(deltaY, deltaX);
             angle = Math.round(angle * 1000.0) / 1000.0;
-    
-            String message = gson.toJson(angle);
+            Map<String, Double> messageMap = new HashMap<>();
+            messageMap.put(SnakeGame.id, angle);
+            
+            String message = gson.toJson(messageMap);
             byte[] sendBuffer = message.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, serverAddress, SERVER_PORT);
             socket.send(sendPacket);
