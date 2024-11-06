@@ -101,22 +101,28 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
     }
 
     private void receiveResponsesLoopSnakes() {
+        long startTime = System.currentTimeMillis();
+        boolean idFound = false;
         while (running) {
             try {
                 String response = client.receiveResponse();
                 synchronized (this) {
-                    Type mapType = new TypeToken<Map<String, SnakeData>>() {
-                    }.getType();
+                    Type mapType = new TypeToken<Map<String, SnakeData>>() {}.getType();
                     snakes = gson.fromJson(response, mapType);
-                    snake = snakes.get(id).getSnakePoint();
-                    if (snake == null) {
+                    // Kiểm tra nếu `id` tồn tại trong `snakes`
+                    if (snakes.containsKey(id)) {
+                        // idFound = true;
+                        startTime = System.currentTimeMillis();
+                        snake = snakes.get(id).getSnakePoint();
+                        head = snake.get(0);
+                        System.out.println("Snake data updated: " + snake);
+                    } else if ((System.currentTimeMillis() - startTime >= 2000)) {
+                        System.out.println("Snake with id " + id + " not found for 2 seconds. Ending game.");
                         running = false;
                         endGame();
                         client.closeConnection();
                         break;
-                        
                     }
-                    head = snake.get(0);
                 }
 
                 String responseFoods = client.receiveResponse();
@@ -124,18 +130,6 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
                     Type foodType = new TypeToken<ArrayList<Food>>() {}.getType();
                     foods = gson.fromJson(responseFoods, foodType);
                 }
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void receiveResponsesLoopFoods() {
-        while (running) {
-            try {
-
-
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
                 e.printStackTrace();
