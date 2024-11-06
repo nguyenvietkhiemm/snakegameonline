@@ -2,22 +2,18 @@ package Client.src;
 
 import java.util.ArrayList;
 import java.awt.Point;
+import java.awt.Color;
 
 public class SnakeData {
     private ArrayList<Point> snakePoint;
+    private double angle = 0;
     private String userName;
-    private float red;
-    private float green;
-    private float blue;
-    private boolean alive;
+    private String color;
     
-    public SnakeData(ArrayList<Point> snakePoint, String userName, float red, float green, float blue, boolean alive) {
+    public SnakeData(ArrayList<Point> snakePoint, String userName, String color) {
         this.snakePoint = snakePoint;
         this.userName = userName;
-        this.red = red;
-        this.green = green;
-        this.blue = blue;
-        this.alive = alive;
+        this.color = color;
     }
 
     public ArrayList<Point> getSnakePoint() {
@@ -35,39 +31,17 @@ public class SnakeData {
     public void setUserName(String userName) {
         this.userName = userName;
     }
-
-    public float getRed() {
-        return red;
+    public void setAngle(double angle) {
+        this.angle = angle;
+    }
+    public double getAngle() {
+        return this.angle;
+    }
+    public Color getColor(){
+        return Color.decode(this.color);
     }
 
-    public void setRed(float red) {
-        this.red = red;
+    public void setColor(String color) {
+        this.color = color;
     }
-
-    public float getGreen() {
-        return green;
-    }
-
-    public void setGreen(float green) {
-        this.green = green;
-    }
-
-    public float getBlue() {
-        return blue;
-    }
-
-    public void setBlue(float blue) {
-        this.blue = blue;
-    }
-
-    public boolean isAlive() {
-        return alive;
-    }
-
-    public void setAlive(boolean alive) {
-        this.alive = alive;
-    }
-    
-    
-   
 }

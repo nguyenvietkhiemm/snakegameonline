@@ -2,22 +2,19 @@ package Server.src;
 
 import java.util.ArrayList;
 import java.awt.Point;
+import java.awt.Color;
 
 public class SnakeData {
     private ArrayList<Point> snakePoint;
+    private double angle = 0;
     private String userName;
-    private float red;
-    private float green;
-    private float blue;
-    private boolean alive;
+    private String color;
     
-    public SnakeData(ArrayList<Point> snakePoint, String userName, float red, float green, float blue, boolean alive) {
+    public SnakeData(ArrayList<Point> snakePoint, String userName, String color) {
         this.snakePoint = snakePoint;
         this.userName = userName;
-        this.red = red;
-        this.green = green;
-        this.blue = blue;
-        this.alive = alive;
+        this.color = color;
+        this.angle = 0;
     }
 
     public ArrayList<Point> getSnakePoint() {
@@ -28,6 +25,32 @@ public class SnakeData {
         this.snakePoint = snakePoint;
     }
 
+    public void updateSnakePoint(){
+        Point head = new Point(snakePoint.get(0));
+
+        head.translate((int) (Match.DOT_SIZE * Math.cos(this.angle) * Match.speedMultiplier) / 2,
+           (int) (Match.DOT_SIZE * Math.sin(angle) * Match.speedMultiplier) / 2);
+        head.x = Math.max(0, Math.min(head.x, Match.MAP_SIZE - Match.DOT_SIZE));
+        head.y = Math.max(0, Math.min(head.y, Match.MAP_SIZE - Match.DOT_SIZE));
+
+        snakePoint.add(0, head);
+        snakePoint.remove(snakePoint.size() - 1);
+    }
+    public void addSnakePoint(){
+        Point head = new Point(snakePoint.get(0));
+
+        head.translate((int) (Match.DOT_SIZE * Math.cos(this.angle) * Match.speedMultiplier) / 2,
+           (int) (Match.DOT_SIZE * Math.sin(angle) * Match.speedMultiplier) / 2);
+        head.x = Math.max(0, Math.min(head.x, Match.MAP_SIZE - Match.DOT_SIZE));
+        head.y = Math.max(0, Math.min(head.y, Match.MAP_SIZE - Match.DOT_SIZE));
+
+        snakePoint.add(0, head);
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -35,36 +58,10 @@ public class SnakeData {
     public void setUserName(String userName) {
         this.userName = userName;
     }
-
-    public float getRed() {
-        return red;
+    public String getColor() {
+        return color;
     }
-
-    public void setRed(float red) {
-        this.red = red;
-    }
-
-    public float getGreen() {
-        return green;
-    }
-
-    public void setGreen(float green) {
-        this.green = green;
-    }
-
-    public float getBlue() {
-        return blue;
-    }
-
-    public void setBlue(float blue) {
-        this.blue = blue;
-    }
-
-    public boolean isAlive() {
-        return alive;
-    }
-
-    public void setAlive(boolean alive) {
-        this.alive = alive;
+    public void setColor(String color) {
+        this.color = color;
     }
 }

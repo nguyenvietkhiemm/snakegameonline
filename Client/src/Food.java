@@ -4,32 +4,27 @@ import java.awt.*;
 
 public class Food {
     public Point position;
-    public int baseSize;
-    public int currentSize;
-    public Color color;
-    public Color glowColor;
-    private boolean increasing = true;
-    private int blinkSpeed = 1;
+    public int size;
+    public String color;
 
-    public Food(Point position, int size, Color color, Color glowColor) {
+    public Food(Point position, int size, String color) {
         this.position = position;
-        this.baseSize = size;
-        this.currentSize = size;
+        this.size = size;
         this.color = color;
-        this.glowColor = glowColor;
+    }
+    public Point getPosition() { return this.position; }
+    public int getSize() { return this.size; }
+    public Color getColor(){
+        return Color.decode(this.color);
     }
 
-    public void updateBlink() {
-        if (increasing) {
-            currentSize += blinkSpeed;
-            if (currentSize >= baseSize + 5) {
-                increasing = false;
-            }
-        } else {
-            currentSize -= blinkSpeed;
-            if (currentSize <= baseSize - 5) {
-                increasing = true;
-            }
-        }
+    public void setPosition(Point position) {
+        this.position = position;
+    }
+    public void setColor(String color) {
+        this.color = color;
+    }
+    public void setSize(int size) {
+        this.size = size;
     }
 }

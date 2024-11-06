@@ -19,6 +19,9 @@ public class ClientHandler implements Runnable {
     private int id;
     private ArrayList<Point> snake = new ArrayList<>();
     private static Gson gson = new Gson();
+    private final int MAP_SIZE = 5000;
+    private final int DOT_SIZE = 35;
+    private final double speedMultiplier = 0.5;
 
     public ClientHandler(InetAddress clientAddress, int clientPort, DatagramSocket socket, int id) {
         this.id = id;
@@ -33,10 +36,9 @@ public class ClientHandler implements Runnable {
         try {
             Map<String, Integer> jsonRes = new HashMap<>();
             jsonRes.put("id", id);
-    
+
             sendMessage(gson.toJson(jsonRes));
-        } 
-        catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -50,7 +52,7 @@ public class ClientHandler implements Runnable {
                 socket.receive(receivePacket);
 
                 String message = new String(receivePacket.getData(), 0, receivePacket.getLength());
-                System.out.printf("Received from client %d: %s%n", id, message);
+                System.out.printf("RECEIVED from client %d: %s%n", id, message);
                 handleClientMessage(message);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -59,30 +61,31 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void handleClientMessage(String message) {
+    public void handleClientMessageFirst(String message) {
         try {
             Type snakeDataType = new TypeToken<SnakeData>() {}.getType();
             SnakeData snakeData = gson.fromJson(message, snakeDataType);
+            snake = snakeData.getSnakePoint();
 
             if (snakeData != null) {
                 Match.updateSnake(String.valueOf(id), snakeData);
             }
-        } 
-        catch (Exception e) {
-            try {
-                Type pointListType = new TypeToken<ArrayList<Point>>() {}.getType();
-                ArrayList<Point> newPoints = gson.fromJson(message, pointListType);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
-                if (newPoints != null) {
-                    SnakeData existingSnakeData = Match.getSnakeDataById(String.valueOf(id));
-                    if (existingSnakeData != null) {
-                        existingSnakeData.setSnakePoint(newPoints);
-                        Match.updateSnake(String.valueOf(id), existingSnakeData);
-                    }
-                }
-            } catch (Exception ex) {
-                System.err.println("Invalid message format received: " + message);
+    public void handleClientMessage(String message) {
+        try {
+            double angle = Double.parseDouble(message);
+
+            SnakeData existingSnakeData = Match.getSnakeDataById(String.valueOf(id));
+            if (existingSnakeData != null) {
+                existingSnakeData.setAngle(angle);
             }
+            
+        } catch (Exception ex) {
+            System.err.println("Invalid message format received: " + message);
         }
     }
 

@@ -1,11 +1,12 @@
 package Client.src;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import java.io.IOException;
 import java.awt.*;
 
 public class Client {
@@ -14,7 +15,7 @@ public class Client {
 
     private DatagramSocket socket;
     private InetAddress serverAddress;
-    private Gson gson = new Gson();
+    Gson gson = new Gson();
 
     public Client() {
         try {
@@ -38,13 +39,23 @@ public class Client {
         }
     }
 
-    // Hàm gửi vị trí rắn (mảng điểm) lên server
-    public void sendSnakeLocation(ArrayList<Point> snake) {
+    // Hàm gửi vị trí snake lên server
+    public void sendSnakeDirection(Point snakeHead, Point mousePosition) {
         try {
-            String message = gson.toJson(snake);
+            double deltaX = mousePosition.x - snakeHead.x;
+            double deltaY = mousePosition.y - snakeHead.y;
+            double distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            if (distance < 50) {
+                return;
+            }
+            double angle = Math.atan2(deltaY, deltaX);
+            angle = Math.round(angle * 1000.0) / 1000.0;
+    
+            String message = gson.toJson(angle);
             byte[] sendBuffer = message.getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, serverAddress, SERVER_PORT);
             socket.send(sendPacket);
+            System.out.println("Sent angle: " + angle);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -53,7 +64,7 @@ public class Client {
     // Nhận phản hồi từ server
     public String receiveResponse() {
         try {
-            byte[] receiveBuffer = new byte[1024];
+            byte[] receiveBuffer = new byte[20480];
             DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
             socket.receive(receivePacket);
 

@@ -1,22 +1,30 @@
 package Server.src;
 
 import java.awt.*;
-import java.util.*;
 
 public class Food {
     public Point position;
     public int size;
-    public Color color;
-    public Color glowColor;
+    public String color;
 
-    public Food(Point position, int size, Color color, Color glowColor) {
+    public Food(Point position, int size, String color) {
         this.position = position;
         this.size = size;
         this.color = color;
-        this.glowColor = glowColor;
     }
-    public Point getPosition() { return position; }
-    public int getSize() { return size; }
-    public Color getColor() { return color; }
-    public Color getGlowColor() { return glowColor; }
+    public Point getPosition() { return this.position; }
+    public int getSize() { return this.size; }
+    public String getColor() {
+        return this.color;
+    }
+
+    public void setPosition(Point position) {
+        this.position = position;
+    }
+    public void setColor(String color) {
+        this.color = color;
+    }
+    public void setSize(int size) {
+        this.size = size;
+    }
 }

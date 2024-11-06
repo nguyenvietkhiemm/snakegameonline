@@ -37,7 +37,7 @@ public class Server {
                 if (clientHandler == null) {
                     clientHandler = new ClientHandler(clientAddress, clientPort, serverSocket, ++clientCounter);
                     clients.put(clientKey, clientHandler);
-                    clientHandler.handleClientMessage(message);
+                    clientHandler.handleClientMessageFirst(message);
                     
                     Thread clientThread = new Thread(clientHandler);
                     clientThread.start();
