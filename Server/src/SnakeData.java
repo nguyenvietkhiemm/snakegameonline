@@ -9,12 +9,14 @@ public class SnakeData {
     private double angle = 0;
     private String userName;
     private String color;
+    private int score;
     
-    public SnakeData(ArrayList<Point> snakePoint, String userName, String color) {
+    public SnakeData(ArrayList<Point> snakePoint, String userName, String color, int score) {
         this.snakePoint = snakePoint;
         this.userName = userName;
         this.color = color;
         this.angle = 0;
+        this.score = score;
     }
 
     public ArrayList<Point> getSnakePoint() {
@@ -36,6 +38,7 @@ public class SnakeData {
         snakePoint.add(0, head);
         snakePoint.remove(snakePoint.size() - 1);
     }
+
     public void addSnakePoint(){
         Point head = new Point(snakePoint.get(0));
 
@@ -47,10 +50,12 @@ public class SnakeData {
         snakePoint.add(0, head);
     }
 
+
     public void setAngle(double angle) {
         this.angle = angle;
     }
 
+    
     public String getUserName() {
         return userName;
     }
@@ -64,4 +69,13 @@ public class SnakeData {
     public void setColor(String color) {
         this.color = color;
     }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+    
 }

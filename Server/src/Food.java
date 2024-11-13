@@ -5,25 +5,24 @@ import java.awt.*;
 public class Food {
     public Point position;
     public int size;
-    public String color;
 
-    public Food(Point position, int size, String color) {
+    public Food(Point position, int size) {
         this.position = position;
         this.size = size;
-        this.color = color;
     }
-    public Point getPosition() { return this.position; }
-    public int getSize() { return this.size; }
-    public String getColor() {
-        return this.color;
+    public Point getPosition() { 
+        return this.position; 
     }
+    
+    public int getSize() { 
+        return this.size; 
+    }
+
 
     public void setPosition(Point position) {
         this.position = position;
     }
-    public void setColor(String color) {
-        this.color = color;
-    }
+
     public void setSize(int size) {
         this.size = size;
     }

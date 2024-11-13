@@ -13,20 +13,22 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import javax.imageio.ImageIO;
+import java.util.List;
+
 
 public class SnakeGame extends JPanel implements ActionListener, MouseMotionListener {
     private Client client = new Client();
 
     private final int WIDTH = 1000;
     private final int HEIGHT = 800;
-    private final int MAP_SIZE = 2000;
+    private final int MAP_SIZE = 3000;
     private final int DOT_SIZE = 35;
 
     private Point mousePosition = new Point(MAP_SIZE / 5 - WIDTH / 2, MAP_SIZE / 5 - HEIGHT / 2);
     private ArrayList<Point> snake = new ArrayList<>();
     private Point head = new Point();
     Map<String, SnakeData> snakes = new HashMap<>();
-
+    Map<String, SnakeData> leaderboard = new HashMap<>(); //bảng xếp hạng
     private boolean running = false;
     private Timer timer;
     public static String id = null;
@@ -37,6 +39,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
     private int viewportX = 0;
     private int viewportY = 0;
     private Image backgroundImage;
+    private Image appleImage;
 
     Random rand = new Random();
     private String snakeColor;
@@ -52,6 +55,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
 
         try {
             backgroundImage = ImageIO.read(new File("GameVisual/background.jpg"));
+            appleImage = ImageIO.read(new File("GameVisual/apple.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -69,7 +73,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
         score = 0;
         timer = new Timer(1000 / 165, this);
 
-        SnakeData snakeData = new SnakeData(snake, playerName, snakeColor);
+        SnakeData snakeData = new SnakeData(snake, playerName, snakeColor, score);
         client.sendSnakeData(snakeData);
         timer.start();
 
@@ -84,13 +88,15 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
         new Thread(this::sendSnakeMovingLoop).start();
     }
 
-    private void sendSnakeMovingLoop() {
+    private void sendSnakeMovingLoop(){
         while (running) {
             if (snake.isEmpty())
                 return;
+
             int adjustedHeadX = head.x - viewportX;
             int adjustedHeadY = head.y - viewportY;
             client.sendSnakeDirection(new Point(adjustedHeadX, adjustedHeadY), mousePosition);
+            
             try {
                 Thread.sleep(1000 / 120);
             } catch (InterruptedException e) {
@@ -115,6 +121,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
                         startTime = System.currentTimeMillis();
                         snake = snakes.get(id).getSnakePoint();
                         head = snake.get(0);
+                        score = snakes.get(id).getScore();
                         System.out.println("Snake data updated: " + snake);
                     } else if ((System.currentTimeMillis() - startTime >= 2000)) {
                         System.out.println("Snake with id " + id + " not found for 2 seconds. Ending game.");
@@ -154,16 +161,18 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
             updateViewport();
             for (Food food : foods) {
                 int halfSize = food.getSize() / 2;
-
                 Point position = food.getPosition();
                 int posX = position.x - halfSize - viewportX;
                 int posY = position.y - halfSize - viewportY;
-
-                // Vẽ thức ăn chính
-                g.setColor(food.getColor());
-                g.fillOval(posX, posY, food.getSize(), food.getSize());
+                
+                // Vẽ ảnh quả táo nếu ảnh đã được tải thành công
+                if (appleImage != null) {
+                    g.drawImage(appleImage, posX, posY, food.getSize() * 2, food.getSize() * 2, this);
+                }
             }
+
             System.out.println("SNAKESNAKE" + snakes);
+            
             for (Map.Entry<String, SnakeData> snake : snakes.entrySet()) {
                 SnakeData snakeData = snake.getValue();
                 if (snakeData == null)
@@ -171,7 +180,6 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
 
                 Point _head = snakeData.getSnakePoint().get(0);
                 double angle = snakeData.getAngle();
-
                 g.setColor(snakeData.getColor());
 
                 // Vẽ thân rắn
@@ -209,17 +217,87 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
                 int x = _head.x - viewportX - stringWidth / 2;
                 int y = _head.y - viewportY - 25;
                 g.drawString(userName, x, y);
-            }
 
-            int diameter = 10;
-            g.fillOval(mousePosition.x - diameter / 2, mousePosition.y - diameter / 2, diameter, diameter);
+            }
+            // Vẽ bảng xếp hạng
+            drawLeaderboard(g);
+
             Point snakeHead = snake.get(0);
-            g.drawLine(head.x - viewportX, head.y - viewportY, mousePosition.x, mousePosition.y);
 
             drawScore(g);
         }
     }
 
+
+    //Phương thức để vẽ bảng xếp hạng
+    private void drawLeaderboard(Graphics g) {
+    // Tạo một danh sách các người chơi và điểm số của họ
+    Map<String, SnakeData> tmp = new HashMap<>(snakes);
+
+    for (Map.Entry<String, SnakeData> tmpEntry : tmp.entrySet()) {
+        String tmpUserId = tmpEntry.getKey(); // Lấy ID người chơi từ tmp
+        SnakeData tmpData = tmpEntry.getValue(); // Lấy SnakeData từ tmp
+
+        // Kiểm tra nếu ID này đã tồn tại trong leaderboard
+        if (leaderboard.containsKey(tmpUserId)) {
+            // Nếu tồn tại, cập nhật điểm
+            leaderboard.get(tmpUserId).setScore(tmpData.getScore());
+        } else {
+            // Nếu chưa tồn tại, thêm mới vào leaderboard
+            leaderboard.put(tmpUserId, tmpData);
+        }
+    }
+    
+    List<Map.Entry<String, SnakeData>> sortedLeaderboard = new ArrayList<>(leaderboard.entrySet());
+    sortedLeaderboard.sort((a, b) -> Integer.compare(b.getValue().getScore(), a.getValue().getScore())); // Sắp xếp theo điểm số từ cao đến thấp
+
+    // Thiết lập vị trí và kích thước của bảng xếp hạng
+    int leaderboardWidth = 250;
+    int leaderboardHeight = 50 + Math.min(10, sortedLeaderboard.size()) * 25;
+    int leaderboardX = getWidth() - leaderboardWidth - 20; // Góc phải trên
+    int leaderboardY = 20;
+
+    // Vẽ nền bán trong suốt cho bảng xếp hạng
+    g.setColor(new Color(0, 0, 0, 150)); // Màu đen với độ trong suốt
+    g.fillRoundRect(leaderboardX - 10, leaderboardY - 10, leaderboardWidth, leaderboardHeight, 15, 15);
+
+    // Vẽ tiêu đề
+    g.setColor(Color.WHITE);
+    g.setFont(new Font("Arial", Font.BOLD, 18));
+    g.drawString("Bảng xếp hạng", leaderboardX + 10, leaderboardY + 10);
+    leaderboardY += 30; // Tăng khoảng cách sau tiêu đề
+
+    // Vẽ tiêu đề của các cột Rank, Tên và Điểm
+    g.setFont(new Font("Arial", Font.BOLD, 16));
+    g.drawString("Rank", leaderboardX + 10, leaderboardY);
+    g.drawString("Tên", leaderboardX + 60, leaderboardY);
+    g.drawString("Điểm", leaderboardX + 180, leaderboardY);
+    leaderboardY += 20; // Tăng khoảng cách sau tiêu đề cột
+
+    // Hiển thị tối đa 10 người chơi
+    g.setFont(new Font("Arial", Font.PLAIN, 14));
+    int maxEntries = Math.min(10, sortedLeaderboard.size());
+    for (int i = 0; i < maxEntries; i++) {
+        Map.Entry<String, SnakeData> entry = sortedLeaderboard.get(i);
+        String userName = entry.getValue().getUserName();
+        int score = entry.getValue().getScore();
+
+        // Định dạng dòng để căn chỉnh cột
+        String rank = (i + 1) + "";   // Thứ hạng
+        String nameColumn = String.format("%-10s", userName);  // Căn trái tên với độ rộng 10
+        String scoreColumn = String.format("%d", score);       // Điểm
+
+        // Vẽ thứ hạng, tên và điểm
+        g.setColor(new Color(255, 215, 0)); // Màu vàng nhạt cho văn bản
+        g.drawString(rank, leaderboardX + 10, leaderboardY);
+        g.drawString(nameColumn, leaderboardX + 60, leaderboardY);
+        g.drawString(scoreColumn, leaderboardX + 180, leaderboardY);
+
+        leaderboardY += 25; // Tăng khoảng cách giữa các mục
+    }
+}
+
+    
     public void drawScore(Graphics g) {
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 20));
@@ -239,16 +317,19 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
     }
 
     public void updateViewport() {
-        if (snake.isEmpty())
+        if (snake.isEmpty()) {
             return;
-
-        double smooth = 0.05;
-        viewportX += (head.x - viewportX - (WIDTH / 2)) * smooth;
-        viewportY += (head.y - viewportY - (HEIGHT / 2)) * smooth;
-
+        }
+    
+        // Cập nhật viewportX và viewportY để luôn giữ đầu rắn ở giữa khung nhìn
+        viewportX = head.x - (WIDTH / 2);
+        viewportY = head.y - (HEIGHT / 2);
+    
+        // Giới hạn viewport trong phạm vi bản đồ
         viewportX = Math.max(0, Math.min(viewportX, MAP_SIZE - WIDTH));
         viewportY = Math.max(0, Math.min(viewportY, MAP_SIZE - HEIGHT));
     }
+    
 
     @Override
     public void mouseMoved(MouseEvent e) {
@@ -281,6 +362,7 @@ public class SnakeGame extends JPanel implements ActionListener, MouseMotionList
         titleLabel.setForeground(new Color(0, 255, 0));
         panel.add(titleLabel, BorderLayout.NORTH);
 
+        
         JTextField nameField = new JTextField();
         nameField.setFont(new Font("Arial", Font.PLAIN, 30));
         nameField.setBackground(new Color(48, 25, 52));

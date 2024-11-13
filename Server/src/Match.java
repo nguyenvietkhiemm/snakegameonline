@@ -48,14 +48,14 @@ public class Match {
         int x = (int) (Math.random() * (MAP_SIZE / DOT_SIZE)) * DOT_SIZE;
         int y = (int) (Math.random() * (MAP_SIZE / DOT_SIZE)) * DOT_SIZE;
         int size = rand.nextInt(10) + 15;
-        String color = String.format("#%02X%02X%02X", rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
-
-        Food food = new Food(new Point(x, y), size, color);
+       
+        Food food = new Food(new Point(x, y), size);
         foods.add(food);
     }
     public static void removeFood(Point location) {
         foods.remove(location);
     }
+
     public static void checkSnakeEatFood() {
         for (SnakeData snake : snakes.values()) {
             Point head = new Point(snake.getSnakePoint().get(0));
@@ -69,7 +69,7 @@ public class Match {
                         snake.addSnakePoint();
                     }
                     foodIterator.remove();
-                    
+                    snake.setScore(snake.getScore() + 1);
                     addFood();
                 }
             }
